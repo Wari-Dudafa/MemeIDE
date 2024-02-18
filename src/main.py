@@ -3,9 +3,11 @@ from PyQt5.QtCore import *
 from PyQt5.Qsci import *
 from PyQt5.QtGui import *
 import webbrowser
-import subprocess
+from io import StringIO
 import MemeIDE.src.lexer as lexer
+import GoofScript.src.main as goof_main
 from pathlib import Path
+import sys
 
 
 class MainWindow(QMainWindow):
@@ -36,21 +38,27 @@ class MainWindow(QMainWindow):
     self.show()
 
   def run_file(self):
+
+    # Backup the original stdout
+    original_stdout = sys.stdout
+
+    # Create a string buffer to capture the prints
+    sys.stdout = StringIO()
+
     if self.current_file_path:
       if ".goof" in self.current_file_path:
 
-        try:
-          # Run the file
-          self.statusBar().showMessage(
-            f"Running {self.current_file_path}", 2000)
-          # Run the file in the terminal
-          output = subprocess.run(["python", "MemeIDE/src/run.py", self.current_file_path, self.current_file_path],
-                                  text=True, capture_output=True, check=True)
-          QMessageBox.information(self, "Output", output.stdout)
-        except subprocess.CalledProcessError as e:
-          # If there's an error running the script, show it in a message box
-          QMessageBox.warning(self, "Error", e.stderr)
+        goof_main.main(self.current_file_path)
 
+        # Get the value from the buffer
+        captured_output = sys.stdout.getvalue()
+
+        # Restore the original stdout
+        sys.stdout = original_stdout
+
+        # Create a new window to display the output
+
+      QMessageBox.information(self, "Output", captured_output)
     else:
       QMessageBox.warning(
         self, "No file", "There is no file currently open to run.")
