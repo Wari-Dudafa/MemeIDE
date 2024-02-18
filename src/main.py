@@ -20,8 +20,9 @@ class MainWindow(QMainWindow):
     self.current_file = None
 
   def init_ui(self):
-    self.setWindowTitle("MEME-IDE")
+    self.setWindowTitle("MemeIDE")
     self.resize(1300, 900)
+    self.setWindowIcon(QIcon('./MemeIDE/assets/logo/GoofyIcon.ico'))
 
     self.setStyleSheet(f"""
             QMainWindow {{
