@@ -4,8 +4,7 @@ from PyQt5.Qsci import *
 from PyQt5.QtGui import *
 import webbrowser
 import subprocess
-
-
+import lexer
 import sys
 from pathlib import Path
 
@@ -201,19 +200,15 @@ class MainWindow(QMainWindow):
     self.text_edit = QsciScintilla()
     self.text_edit.setFont(QFont("Consolas", 10))
 
-    # Set the Python lexer
-    lexer = QsciLexerPython()
-    lexer.setDefaultFont(QFont("Consolas", 10))
-    self.text_edit.setLexer(lexer)
+    # Set my lexer
+    self.custom_lexer = lexer.CustomLexer(self.text_edit)
+    self.text_edit.setLexer(self.custom_lexer)
 
     # Enable line numbers with the margin
     self.text_edit.setMarginsFont(self.text_edit.font())
     self.text_edit.setMarginWidth(0, QFontMetrics(
       self.text_edit.font()).width("0000") + 6)
     self.text_edit.setMarginLineNumbers(0, True)
-
-    # Set background color for the editor (light blue)
-    # lexer.setPaper(QColor("#ADD8E6"))
 
     # added to the body_frame widget children
     body_layout.addWidget(self.text_edit)
@@ -245,7 +240,8 @@ class MainWindow(QMainWindow):
       with open(file_path, 'r', encoding='utf-8') as file:
         file_content = file.read()
         # Display just the file name
-        self.file_name_label.setText(QFileInfo(file_path).fileName())
+        self.file_name_label.setText(
+          QFileInfo(file_path).fileName().replace(".goof", ""))
       # Display the content in the editor
       self.text_edit.setText(file_content)
 
