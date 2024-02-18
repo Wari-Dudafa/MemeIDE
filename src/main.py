@@ -16,6 +16,7 @@ class MainWindow(QMainWindow):
     self.body_clr = "#ADD8E6"
     self.init_ui()
     self.current_file_path = None
+    self.current_folder_path = None
     self.current_file = None
 
   def init_ui(self):
@@ -76,6 +77,10 @@ class MainWindow(QMainWindow):
     close_file.setShortcut("Ctrl+C")
     close_file.triggered.connect(self.close_file)
 
+    new_file = file_menu.addAction("New File")
+    new_file.setShortcut("Ctrl+N")
+    new_file.triggered.connect(self.new_file)
+
     # death menu
     edit_menu = menu_bar.addMenu("Dont Click Me")
 
@@ -98,7 +103,8 @@ class MainWindow(QMainWindow):
       self.directory_view.setRootIndex(
         self.file_system_model.setRootPath(dir_path))
 
-    # add more
+    self.current_folder_path = dir_path
+
   def close_file(self):
     # Check if there are unsaved changes
     if self.text_edit.document().isModified():
@@ -122,9 +128,6 @@ class MainWindow(QMainWindow):
       with open(self.current_file_path, 'w', encoding='utf-8') as file:
         file.write(self.text_edit.text())
       self.statusBar().showMessage(f"Saved {self.current_file_path}", 2000)
-    else:
-      # No file is open, use Save As functionality
-      self.save_as()
 
   def open_file(self):
     # Open a file dialog to select a .txt file
@@ -157,16 +160,17 @@ class MainWindow(QMainWindow):
     main_layout = QHBoxLayout()
 
     # File explorer
-    self.file_system_model = QFileSystemModel(self)
-    self.file_system_model.setReadOnly(False)
-
+    self.file_system_model = QFileSystemModel()
     self.directory_view = QTreeView()
 
+    self.file_system_model.setReadOnly(False)
     self.directory_view.setModel(self.file_system_model)
+
     self.directory_view.hideColumn(1)  # hide size
     self.directory_view.hideColumn(2)  # hide type
     self.directory_view.hideColumn(3)  # hide date modified
     self.directory_view.setVisible(True)
+    self.directory_view.setHeaderHidden(True)
     self.directory_view.clicked.connect(self.open_file_from_tree)
 
     # Pink body area
@@ -229,6 +233,7 @@ class MainWindow(QMainWindow):
     central_widget = QWidget()
     central_widget.setLayout(main_layout)
     self.setCentralWidget(central_widget)
+    self.directory_view.setModel(self.file_system_model)
 
   def open_file_from_tree(self, file_index):
     file_path = self.file_system_model.filePath(file_index)
@@ -243,6 +248,40 @@ class MainWindow(QMainWindow):
         self.file_name_label.setText(QFileInfo(file_path).fileName())
       # Display the content in the editor
       self.text_edit.setText(file_content)
+
+  def new_file(self):
+    reply = QMessageBox.question(self, 'New File', "You may have unsaved changes. Do you want to save them before creating a new .goof file?",
+                                 QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel, QMessageBox.Save)
+
+    if reply == QMessageBox.Save:
+      self.save_file()  # Save the current file
+      # After saving, proceed to create a new file
+      self.create_and_open_new_goof_file()
+    elif reply == QMessageBox.Discard:
+      # Directly create a new file without saving
+      self.create_and_open_new_goof_file()
+    elif reply == QMessageBox.Cancel:
+      return  # Do not create a new file if the user cancels
+
+  def create_and_open_new_goof_file(self):
+    if not self.current_folder_path:
+      # If the current folder path is not set, open the folder dialog
+      self.open_folder()
+      return
+
+    # Define the new file path for the .goof file in the current directory
+    file_name = "new_file.goof"
+    new_file_path = self.current_folder_path + "/" + file_name
+    # Open (or create if doesn't exist) the file for writing and close it to make sure it exists
+    with open(new_file_path, 'w') as file:
+      file.write("")  # Writing an empty string to ensure the file is created
+    # Set the current file path to the new file
+    self.current_file_path = new_file_path
+    # Update the editor and file name label to reflect the new file
+    self.text_edit.clear()
+    self.file_name_label.setText(file_name)
+    self.statusBar().showMessage(
+      f"New .goof file created: {file_name}", 2000)
 
 
 if __name__ == '__main__':
