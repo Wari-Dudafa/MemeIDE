@@ -46,7 +46,8 @@ class CustomLexer(QsciLexerCustom):
 
       # Style the word itself
       word = match.group()
-      style = self.blue_style if word.lower() in self.blue_words else 0
+      style = self.blue_style if ((word.lower() in self.blue_words) or (
+        word.upper() in self.blue_words))else 0
       self.setStyling(len(word), style)
 
       # Update the position
