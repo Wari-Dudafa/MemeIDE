@@ -35,6 +35,7 @@ class MainWindow(QMainWindow):
     self.setFont(self.window_font)
     self.set_up_menu()
     self.set_up_body()
+    self.open_folder(QDir.homePath())
     self.show()
 
   def run_file(self):
@@ -171,6 +172,7 @@ class MainWindow(QMainWindow):
     # File explorer
     self.file_system_model = QFileSystemModel()
     self.directory_view = QTreeView()
+    self.file_system_model.setRootPath(QDir.homePath())
 
     self.file_system_model.setReadOnly(False)
     self.directory_view.setModel(self.file_system_model)
@@ -188,6 +190,11 @@ class MainWindow(QMainWindow):
     self.body_frame.setFrameShadow(QFrame.Plain)
     self.body_frame.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
     body_layout = QVBoxLayout()
+
+    body_layout = QVBoxLayout()
+    body_layout.setSpacing(0)
+    body_layout.setContentsMargins(10, 0, 0, 0)
+
     self.body_frame.setLayout(body_layout)
 
     # Label for displaying the file name
@@ -200,11 +207,15 @@ class MainWindow(QMainWindow):
             background-color: white;
             padding: 5px;
             border-radius: 5px;
+            border: 3px solid black;
         """)
     self.file_name_label.setSizePolicy(
       QSizePolicy.Preferred, QSizePolicy.Maximum)
 
     body_layout.addWidget(self.file_name_label)
+
+    spacer = QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Fixed)
+    body_layout.addItem(spacer)
 
     # QsciScintilla editor
     self.text_edit = QsciScintilla()
