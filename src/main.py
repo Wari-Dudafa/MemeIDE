@@ -4,8 +4,7 @@ from PyQt5.Qsci import *
 from PyQt5.QtGui import *
 import webbrowser
 import subprocess
-import lexer
-import sys
+import MemeIDE.src.lexer as lexer
 from pathlib import Path
 
 
@@ -26,7 +25,7 @@ class MainWindow(QMainWindow):
             QMainWindow {{
                 background-color: {self.body_clr};
             }}
-            """ + open("./src/css/style.qss", "r").read())
+            """ + open("./MemeIDE/src/css/style.qss", "r").read())
 
     # font needs to be installed on computer
     self.window_font = QFont("Microsoft Sans Serif")
@@ -38,17 +37,20 @@ class MainWindow(QMainWindow):
 
   def run_file(self):
     if self.current_file_path:
-      # Run the current file as a Python script
-      try:
-        # Execute the script
-        output = subprocess.run(
-          ['python', self.current_file_path], text=True, capture_output=True, check=True)
-        # Display the script's output and/or errors
-        self.statusBar().showMessage("Script executed successfully.", 5000)
-        QMessageBox.information(self, "Output", output.stdout)
-      except subprocess.CalledProcessError as e:
-        # If there's an error running the script, show it in a message box
-        QMessageBox.warning(self, "Error", e.stderr)
+      if ".goof" in self.current_file_path:
+
+        try:
+          # Run the file
+          self.statusBar().showMessage(
+            f"Running {self.current_file_path}", 2000)
+          # Run the file in the terminal
+          output = subprocess.run(["python", "MemeIDE/src/run.py", self.current_file_path, self.current_file_path],
+                                  text=True, capture_output=True, check=True)
+          QMessageBox.information(self, "Output", output.stdout)
+        except subprocess.CalledProcessError as e:
+          # If there's an error running the script, show it in a message box
+          QMessageBox.warning(self, "Error", e.stderr)
+
     else:
       QMessageBox.warning(
         self, "No file", "There is no file currently open to run.")
@@ -278,9 +280,3 @@ class MainWindow(QMainWindow):
     self.file_name_label.setText(file_name)
     self.statusBar().showMessage(
       f"New .goof file created: {file_name}", 2000)
-
-
-if __name__ == '__main__':
-  app = QApplication([])
-  window = MainWindow()
-  sys.exit(app.exec())

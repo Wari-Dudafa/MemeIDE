@@ -1,4 +1,4 @@
-import constants
+import GoofScript.src.constants as constants
 from PyQt5.Qsci import QsciLexerCustom
 from PyQt5.QtGui import QColor, QFont
 import re
