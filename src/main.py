@@ -5,6 +5,7 @@ from PyQt5.QtGui import *
 import webbrowser
 from io import StringIO
 import MemeIDE.src.lexer as lexer
+import MemeIDE.src.filesystem as filesystem
 import GoofScript.src.main as goof_main
 from pathlib import Path
 import sys
@@ -60,7 +61,10 @@ class MainWindow(QMainWindow):
 
         # Create a new window to display the output
 
-      QMessageBox.information(self, "Output", captured_output)
+        QMessageBox.information(self, "Output", captured_output)
+      else:
+        QMessageBox.warning(
+          self, "No GoofScript", "There is no GoofScript file currently open to run.")
     else:
       QMessageBox.warning(
         self, "No file", "There is no file currently open to run.")
@@ -171,9 +175,9 @@ class MainWindow(QMainWindow):
     main_layout = QHBoxLayout()
 
     # File explorer
-    self.file_system_model = QFileSystemModel()
-    self.directory_view = QTreeView()
+    self.file_system_model = filesystem.FileSystemModel()
     self.file_system_model.setRootPath(QDir.homePath())
+    self.directory_view = QTreeView()
 
     self.file_system_model.setReadOnly(False)
     self.directory_view.setModel(self.file_system_model)
